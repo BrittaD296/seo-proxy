@@ -1,17 +1,7 @@
 {
   "functions": {
-    "api/fetch.js":      { "maxDuration": 15 },
-    "api/generate.js":   { "maxDuration": 15 },
-    "api/subscribe.js":  { "maxDuration": 15 }
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin",  "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
-      ]
-    }
-  ]
+    "api/fetch.js":     { "maxDuration": 15 },
+    "api/generate.js":  { "maxDuration": 15 },
+    "api/subscribe.js": { "maxDuration": 15 }
+  }
 }

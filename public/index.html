@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SEO On-Page Check – Britta Distel</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans','Helvetica Neue',Helvetica,sans-serif;background:#faf7f5;min-height:100vh;color:#0f172a}
+    .header{background:#18080c;padding:24px 16px 20px}
+    .header-inner{max-width:680px;margin:0 auto}
+    .eyebrow{font-size:10px;letter-spacing:3px;color:#b86a42;font-weight:700;text-transform:uppercase;margin-bottom:5px}
+    h1{font-family:Georgia,serif;font-size:clamp(18px,4vw,30px);color:#fdf6f0;font-weight:400;margin-bottom:4px}
+    .subline{color:#957070;font-size:12px}
+    .subline b{color:#c4804a}
+    .wrap{max-width:680px;margin:0 auto;padding:16px 12px}
+
+    /* Input Card */
+    .card{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid #ede5e0}
+    .card label{font-size:13px;font-weight:600;color:#18080c;display:block;margin-bottom:9px}
+    .input-row{display:flex;gap:9px}
+    .input-row input{flex:1;padding:11px 13px;border:2px solid #e8ddd8;border-radius:10px;font-size:14px;outline:none;font-family:inherit;color:#18080c;background:#fdfbfa;transition:border-color .2s}
+    .input-row input:focus{border-color:#b86a42}
+    .btn{padding:11px 18px;background:#b86a42;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
+    .btn:disabled{background:#c9987a;cursor:default}
+    .btn:hover:not(:disabled){background:#9d5a34}
+
+    /* Loader */
+    .loader{margin-top:10px;display:none}
+    .loader.active{display:block}
+    .loader-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+    .dot{width:6px;height:6px;border-radius:50%;background:#b86a42;animation:blink 1s infinite}
+    .loader-text{font-size:11px;color:#94a3b8}
+    .bar-wrap{height:3px;background:#f0e8e4;border-radius:2px;overflow:hidden}
+    .bar{height:100%;background:#b86a42;border-radius:2px;animation:sweep 1.8s ease-in-out infinite;width:40%}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    @keyframes sweep{0%{transform:translateX(-130%)}100%{transform:translateX(300%)}}
+
+    /* Error */
+    .error-box{margin-top:12px;padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;color:#b91c1c;font-size:12px;line-height:1.6;display:none}
+    .error-box.active{display:block}
+
+    /* Score Card */
+    .score-card{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid #ede5e0;margin-top:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;display:none}
+    .score-card.active{display:flex}
+    .ring-wrap svg{flex-shrink:0}
+    .score-info{flex:1;min-width:180px}
+    .page-title-small{font-size:11px;color:#94a3b8;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .score-headline{font-family:Georgia,serif;font-size:17px;color:#18080c;font-weight:400;margin-bottom:6px}
+    .summary-text{font-size:12px;color:#475569;margin-bottom:8px;line-height:1.6}
+    .badges{display:flex;gap:6px;flex-wrap:wrap}
+    .badge{padding:3px 10px;border-radius:7px;font-size:12px;font-weight:700}
+    .badge-ok{background:#f0fdf4;color:#16a34a}
+    .badge-warn{background:#fffbeb;color:#d97706}
+    .badge-fail{background:#fef2f2;color:#dc2626}
+
+    /* Filter */
+    .filter{display:flex;gap:5px;flex-wrap:wrap;margin:12px 0 8px;display:none}
+    .filter.active{display:flex}
+    .filter-btn{padding:3px 11px;border-radius:20px;border:1.5px solid #e2d8d4;background:#fff;color:#64748b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+    .filter-btn.active{border-color:#b86a42;background:#b86a42;color:#fff}
+
+    /* Results */
+    .results{display:flex;flex-direction:column;gap:6px;padding-bottom:40px;display:none}
+    .results.active{display:flex}
+    .factor{background:#fff;border-radius:11px;padding:11px 13px;display:flex;align-items:flex-start;gap:11px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .factor-icon{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+    .factor-body{flex:1;min-width:0}
+    .factor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+    .factor-label{font-size:13px;font-weight:600;color:#0f172a}
+    .factor-group{font-size:10px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+    .factor-detail{font-size:12px;color:#64748b;margin-top:3px;line-height:1.55;word-break:break-word}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <p class="eyebrow">SEO On-Page Check</p>
+    <h1>Wie gut ist deine Website wirklich?</h1>
+    <p class="subline">21 Faktoren · echter HTML-Quelltext · von <b>Britta Distel</b></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <label for="url-input">URL eingeben</label>
+    <div class="input-row">
+      <input id="url-input" type="text" placeholder="z.B. britta-distel.de" autocomplete="off"/>
+      <button class="btn" id="run-btn" onclick="run()">Prüfen →</button>
+    </div>
+    <div class="loader" id="loader">
+      <div class="loader-row"><span class="dot"></span><span class="loader-text" id="step-text">Lädt…</span></div>
+      <div class="bar-wrap"><div class="bar"></div></div>
+    </div>
+  </div>
+
+  <div class="error-box" id="error-box"></div>
+
+  <!-- Score -->
+  <div class="score-card" id="score-card">
+    <svg width="96" height="96" viewBox="0 0 100 100" id="ring-svg">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="9"/>
+      <circle id="ring-arc" cx="50" cy="50" r="40" fill="none" stroke="#16a34a" stroke-width="9"
+        stroke-dasharray="0 251.3" stroke-linecap="round" transform="rotate(-90 50 50)"
+        style="transition:stroke-dasharray .7s ease"/>
+      <text id="ring-num" x="50" y="45" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a" font-family="Georgia,serif">0</text>
+      <text id="ring-den" x="50" y="61" text-anchor="middle" font-size="10" fill="#64748b" font-family="sans-serif">von 0</text>
+    </svg>
+    <div class="score-info">
+      <p class="page-title-small" id="score-title"></p>
+      <h2 class="score-headline" id="score-head"></h2>
+      <p class="summary-text" id="score-summary"></p>
+      <div class="badges" id="badges"></div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter" id="filter"></div>
+
+  <!-- Results -->
+  <div class="results" id="results"></div>
+
+</div>
+
+<script>
+const FACTORS = [
+  {id:"h1",                     label:"H1-Überschrift",                   group:"Struktur"  },
+  {id:"h1_count",               label:"Nur eine H1",                       group:"Struktur"  },
+  {id:"h2",                     label:"H2-Überschriften",                  group:"Struktur"  },
+  {id:"heading_hierarchy",      label:"Überschriften-Hierarchie",          group:"Struktur"  },
+  {id:"meta_title",             label:"Meta Title – Inhalt",               group:"Meta"      },
+  {id:"meta_title_length",      label:"Meta Title Länge (50–60 Zeichen)",  group:"Meta"      },
+  {id:"meta_description",       label:"Meta Description – Inhalt",         group:"Meta"      },
+  {id:"meta_description_length",label:"Meta Description Länge (120–160)", group:"Meta"       },
+  {id:"alt_texts",              label:"Alt-Texte – Übersicht",             group:"Bilder"    },
+  {id:"alt_texts_detail",       label:"Bilder ohne Alt-Text (Dateinamen)", group:"Bilder"    },
+  {id:"canonical",              label:"Canonical Tag",                     group:"Technisch" },
+  {id:"robots",                 label:"Seite indexierbar",                 group:"Technisch" },
+  {id:"viewport",               label:"Viewport (Mobile)",                 group:"Technisch" },
+  {id:"https",                  label:"HTTPS aktiv",                       group:"Technisch" },
+  {id:"lang_attribute",         label:"HTML lang-Attribut",                group:"Technisch" },
+  {id:"internal_links",         label:"Interne Links",                     group:"Verlinkung"},
+  {id:"og_title",               label:"OG Title (Social Media)",           group:"Social"    },
+  {id:"og_description",         label:"OG Description (Social Media)",     group:"Social"    },
+  {id:"schema",                 label:"Schema Markup (JSON-LD)",           group:"Schema"    },
+  {id:"word_count",             label:"Textlänge (mind. 300 Wörter)",      group:"Content"   },
+  {id:"keyword_in_title",       label:"Keyword aus H1 im Title",           group:"Content"   },
+];
+
+const SC = {
+  ok:      {color:"#16a34a",bg:"#f0fdf4",border:"#bbf7d0",icon:"✓"},
+  warn:    {color:"#d97706",bg:"#fffbeb",border:"#fde68a",icon:"!"},
+  fail:    {color:"#dc2626",bg:"#fef2f2",border:"#fecaca",icon:"✗"},
+  unknown: {color:"#94a3b8",bg:"#f8fafc",border:"#e2e8f0",icon:"?"},
+};
+
+let activeGroup = "Alle";
+let currentResults = null;
+
+document.getElementById("url-input").addEventListener("keydown", e => { if(e.key==="Enter") run(); });
+
+async function run() {
+  let u = document.getElementById("url-input").value.trim();
+  if (!u) return;
+  if (!u.startsWith("http")) u = "https://" + u;
+
+  setLoading(true); setError(""); hideResults();
+
+  try {
+    setStep("HTML-Quelltext wird geladen…");
+    const res = await fetch("/api/fetch?url=" + encodeURIComponent(u));
+    if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||"HTTP "+res.status); }
+    const html = await res.text();
+
+    setStep("Quelltext wird analysiert…");
+    const {results, pageTitle} = analyzeHtml(html, u);
+    currentResults = results;
+
+    setStep("Fazit wird erstellt…");
+    const summary = await getSummary(results, pageTitle);
+
+    renderResults(results, pageTitle, summary);
+  } catch(e) {
+    setError(e.message);
+  } finally {
+    setLoading(false); setStep("");
+  }
+}
+
+function analyzeHtml(html, pageUrl) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const ok   = d=>({status:"ok",   detail:d});
+  const warn = d=>({status:"warn", detail:d});
+  const fail = d=>({status:"fail", detail:d});
+  const q  = s=>doc.querySelector(s);
+  const qa = s=>Array.from(doc.querySelectorAll(s));
+  const attr=(s,a)=>q(s)?.getAttribute(a)?.trim()??"";
+  const cut=(s,n=85)=>s&&s.length>n?s.slice(0,n)+"…":(s||"");
+
+  const h1s = qa("h1").map(e=>e.textContent.trim()).filter(Boolean);
+  const h2s = qa("h2").map(e=>e.textContent.trim()).filter(Boolean);
+  const h1 = h1s.length>0 ? ok('"'+cut(h1s[0])+'"') : fail("Keine H1 gefunden");
+  const h1_count = h1s.length===1 ? ok("Genau 1 H1 – korrekt")
+    : h1s.length===0 ? fail("Keine H1 vorhanden")
+    : warn(h1s.length+" H1-Tags – nur eine erlaubt");
+  const h2 = h2s.length>0
+    ? ok(h2s.length+' H2: "'+cut(h2s.slice(0,2).join('", "'),90)+'"')
+    : warn("Keine H2-Überschriften gefunden");
+  const allH = qa("h1,h2,h3,h4,h5,h6");
+  let jumpAt="";
+  for(let i=1;i<allH.length;i++){const a=+allH[i-1].tagName[1],b=+allH[i].tagName[1];if(b-a>1){jumpAt=allH[i-1].tagName+"→"+allH[i].tagName;break;}}
+  const heading_hierarchy = jumpAt ? warn("Sprung: "+jumpAt) : ok("Korrekte Hierarchie"+(allH.length>0?": "+[...new Set(allH.map(h=>h.tagName))].join("→"):""));
+
+  const titleTxt=(q("title")?.textContent??"").trim(), tLen=titleTxt.length;
+  const meta_title = titleTxt ? ok('"'+cut(titleTxt,110)+'"') : fail("Kein <title>-Tag");
+  const meta_title_length = !titleTxt ? fail("Kein Title")
+    : tLen>=50&&tLen<=60 ? ok(tLen+" Zeichen – optimal")
+    : tLen<30 ? fail("Nur "+tLen+" Zeichen – viel zu kurz")
+    : tLen<50 ? warn(tLen+" Zeichen – etwas kurz (Ziel: 50–60)")
+    : tLen<=70 ? warn(tLen+" Zeichen – etwas lang (Ziel: 50–60)")
+    : fail(tLen+" Zeichen – wird in Google abgeschnitten");
+
+  const descTxt=attr('meta[name="description"]',"content"), dLen=descTxt.length;
+  const meta_description = descTxt ? ok('"'+cut(descTxt,140)+'"') : fail("Keine Meta Description");
+  const meta_description_length = !descTxt ? fail("Keine Meta Description")
+    : dLen>=120&&dLen<=160 ? ok(dLen+" Zeichen – optimal")
+    : dLen<50 ? fail("Nur "+dLen+" Zeichen – viel zu kurz")
+    : dLen<120 ? warn(dLen+" Zeichen – zu kurz (Ziel: 120–160)")
+    : dLen<=185 ? warn(dLen+" Zeichen – etwas lang")
+    : fail(dLen+" Zeichen – wird abgeschnitten");
+
+  const imgs=qa("img"), noAlt=imgs.filter(i=>{const a=i.getAttribute("alt");return a===null||a.trim()==="";});
+  const mf=noAlt.map(i=>(i.getAttribute("src")||"").split("/").pop().split("?")[0]||"?").slice(0,6);
+  const alt_texts = imgs.length===0 ? ok("Keine Bilder") : noAlt.length===0 ? ok("Alle "+imgs.length+" Bilder mit Alt-Text ✓") : noAlt.length===imgs.length ? fail("Alle "+imgs.length+" Bilder ohne Alt-Text") : warn(noAlt.length+" von "+imgs.length+" ohne Alt-Text");
+  const alt_texts_detail = noAlt.length===0 ? ok("Kein Handlungsbedarf") : fail("Fehlend: "+mf.join(", ")+(noAlt.length>6?" … +mehr":""));
+
+  const canonical=attr('link[rel="canonical"]',"href");
+  const canonicalR = canonical ? ok(cut(canonical,80)) : fail("Kein Canonical Tag");
+  const rt=attr('meta[name="robots"]',"content").toLowerCase();
+  const robots = rt.includes("noindex") ? fail("noindex – Seite wird NICHT indexiert!") : rt ? ok('"'+rt+'"') : ok("Kein robots-Tag = indexierbar");
+  const vp=attr('meta[name="viewport"]',"content");
+  const viewport = vp ? ok('"'+cut(vp,60)+'"') : fail("Kein Viewport-Tag");
+  const langA=doc.documentElement.getAttribute("lang")||"";
+  const lang_attribute = langA ? ok('lang="'+langA+'"') : warn("Kein lang-Attribut");
+  const https_r = pageUrl.startsWith("https://") ? ok("HTTPS aktiv") : fail("Kein HTTPS");
+
+  let domain=""; try{domain=new URL(pageUrl).hostname;}catch{}
+  const il=qa("a[href]").filter(a=>{const h=a.getAttribute("href")||"";return h.startsWith("/")||h.startsWith("#")||(domain&&h.includes(domain));});
+  const internal_links = il.length>=5 ? ok(il.length+" interne Links") : il.length>=2 ? warn("Nur "+il.length+" interne Links") : fail("Kaum interne Links");
+
+  const ogT=attr('meta[property="og:title"]',"content");
+  const og_title = ogT ? ok('"'+cut(ogT,80)+'"') : warn("Kein og:title");
+  const ogD=attr('meta[property="og:description"]',"content");
+  const og_description = ogD ? ok('"'+cut(ogD,80)+'"') : warn("Kein og:description");
+
+  const schemas=qa('script[type="application/ld+json"]');
+  const types=schemas.flatMap(s=>{try{const j=JSON.parse(s.textContent);return j["@type"]?[j["@type"]]:[]}catch{return[]}});
+  const schema = types.length>0 ? ok("JSON-LD: "+types.join(", ")) : schemas.length>0 ? ok(schemas.length+" JSON-LD-Block(s)") : warn("Kein Schema Markup");
+
+  const words=(doc.body?.textContent||"").split(/\s+/).filter(w=>w.length>2).length;
+  const word_count = words>=300 ? ok("ca. "+words+" Wörter") : words>=150 ? warn("Nur ca. "+words+" Wörter (Ziel: 300+)") : fail("Nur ca. "+words+" Wörter");
+
+  const mw=(h1s[0]||"").toLowerCase().split(/\s+/).find(w=>w.length>4)||"";
+  const keyword_in_title = titleTxt&&h1s.length>0&&mw ? (titleTxt.toLowerCase().includes(mw) ? ok("Keyword aus H1 im Title") : warn("Kein gemeinsames Keyword in Title+H1")) : warn("Nicht prüfbar");
+
+  return {results:{h1,h1_count,h2,heading_hierarchy,meta_title,meta_title_length,meta_description,meta_description_length,alt_texts,alt_texts_detail,canonical:canonicalR,robots,viewport,https:https_r,lang_attribute,internal_links,og_title,og_description,schema,word_count,keyword_in_title}, pageTitle:titleTxt||domain};
+}
+
+async function getSummary(results, pageTitle) {
+  const fails=Object.entries(results).filter(([,v])=>v.status==="fail").map(([k])=>k);
+  const warns=Object.entries(results).filter(([,v])=>v.status==="warn").map(([k])=>k);
+  try {
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:160,messages:[{role:"user",content:'SEO-Analyse "'+pageTitle+'": Fehler: '+(fails.join(", ")||"keine")+'. Warnungen: '+(warns.join(", ")||"keine")+'. 2 direkte Sätze Deutsch Du-Form – wichtigster Handlungsbedarf. Kein Blabla.'}]})});
+    const d=await r.json(); return d.content?.[0]?.text||"";
+  } catch{return "";}
+}
+
+function renderResults(results, pageTitle, summary) {
+  const vals = Object.values(results);
+  const okN=vals.filter(r=>r.status==="ok").length;
+  const warnN=vals.filter(r=>r.status==="warn").length;
+  const failN=vals.filter(r=>r.status==="fail").length;
+  const total=FACTORS.length;
+
+  // Ring
+  const arc=document.getElementById("ring-arc");
+  const circ=2*Math.PI*40, p=okN/total;
+  arc.setAttribute("stroke-dasharray",`${p*circ} ${circ}`);
+  arc.setAttribute("stroke",p>=.8?"#16a34a":p>=.5?"#d97706":"#dc2626");
+  document.getElementById("ring-num").textContent=okN;
+  document.getElementById("ring-den").textContent="von "+total;
+
+  document.getElementById("score-title").textContent=pageTitle;
+  document.getElementById("score-head").textContent=okN>=17?"Stark aufgestellt 💪":okN>=11?"Solide – Luft nach oben.":"Hier gibt's einiges zu tun.";
+  document.getElementById("score-summary").textContent=summary;
+  document.getElementById("badges").innerHTML=
+    `<span class="badge badge-ok">${okN} Bestanden</span>`+
+    `<span class="badge badge-warn">${warnN} Warnungen</span>`+
+    `<span class="badge badge-fail">${failN} Fehler</span>`;
+  document.getElementById("score-card").classList.add("active");
+
+  // Filter
+  const groups=["Alle",...new Set(FACTORS.map(f=>f.group))];
+  const filterEl=document.getElementById("filter");
+  filterEl.innerHTML=groups.map(g=>`<button class="filter-btn${g===activeGroup?" active":""}" onclick="setGroup('${g}')">${g}</button>`).join("");
+  filterEl.classList.add("active");
+
+  renderFactors(results);
+  document.getElementById("results").classList.add("active");
+}
+
+function setGroup(g) {
+  activeGroup=g;
+  document.querySelectorAll(".filter-btn").forEach(b=>{b.classList.toggle("active",b.textContent===g);});
+  renderFactors(currentResults);
+}
+
+function renderFactors(results) {
+  const el=document.getElementById("results");
+  const visible=FACTORS.filter(f=>activeGroup==="Alle"||f.group===activeGroup);
+  el.innerHTML=visible.map(f=>{
+    const r=results[f.id]||{status:"unknown",detail:""};
+    const cfg=SC[r.status]||SC.unknown;
+    return `<div class="factor" style="border:1.5px solid ${cfg.border}">
+      <div class="factor-icon" style="background:${cfg.bg};border:1.5px solid ${cfg.border};color:${cfg.color}">${cfg.icon}</div>
+      <div class="factor-body">
+        <div class="factor-head">
+          <span class="factor-label">${f.label}</span>
+          <span class="factor-group">${f.group}</span>
+        </div>
+        ${r.detail?`<p class="factor-detail">${r.detail}</p>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function setLoading(on) {
+  document.getElementById("loader").classList.toggle("active",on);
+  document.getElementById("run-btn").disabled=on;
+  document.getElementById("run-btn").textContent=on?"Läuft…":"Prüfen →";
+}
+function setStep(t){document.getElementById("step-text").textContent=t;}
+function setError(msg){const e=document.getElementById("error-box");e.textContent=msg?("Fehler: "+msg):"";e.classList.toggle("active",!!msg);}
+function hideResults(){document.getElementById("score-card").classList.remove("active");document.getElementById("filter").classList.remove("active");document.getElementById("results").classList.remove("active");}
+</script>
+</body>
+</html>
